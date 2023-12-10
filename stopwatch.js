@@ -1,65 +1,107 @@
-const display = document.getElementById("stopwatch-display");
-const startPause = document.querySelector(".stopwatch-button.start");
-const restart = document.querySelector(".stopwatch-button.reset");
+const displayHTML = document.getElementById("stopwatch-display");
+const startPauseHTML = document.querySelector(".stopwatch-button.start");
+const resetHTML = document.querySelector(".stopwatch-button.reset");
+const wheelLine1HTML = document.querySelectorAll(".stopwatch-wheel-line")[0];
+const wheelLine2HTML = document.querySelectorAll(".stopwatch-wheel-line")[1];
 
-let hours = 0;
-let minutes = 0;
-let seconds = 0;
+let stopwatch = {
+  display: displayHTML,
+  startPause: startPauseHTML,
+  reset: resetHTML,
+  wheel1: wheelLine1HTML,
+  wheel2: wheelLine2HTML,
+  hours: 0,
+  minutes: 0,
+  seconds: 0,
+  watchStarted: false,
+  intervalID: null,
+  wheelIntervalID: null,
+  wheelRotation: 0,
+};
 
-let intervalId;
-let intervalRunning = false;
+stopwatch.startPause.addEventListener("click", function () {
+  toggleWatch(stopwatch);
+  toggleWatchClass(stopwatch);
+  moveWatchTime(stopwatch);
+  spinWatchWheels(stopwatch);
+});
 
-startPause.addEventListener("click", toggleWatch);
-restart.addEventListener("click", resetWatch);
+stopwatch.reset.addEventListener("click", function () {
+  resetWatch(stopwatch);
+});
 
-function toggleWatch() {
-  intervalRunning = !intervalRunning;
-  startPause.innerText = intervalRunning ? "‖" : "▶";
-  startPause.classList.toggle("start");
-  startPause.classList.toggle("pause");
+function toggleWatch(_stopwatch) {
+  _stopwatch.watchStarted = !_stopwatch.watchStarted;
+}
 
-  if (intervalRunning) {
-    intervalId = setInterval(() => {
-      seconds++;
-      updateDisplay();
+function toggleWatchClass(stopwatch) {
+  stopwatch.startPause.innerText = stopwatch.watchStarted ? "‖" : "▶";
+  stopwatch.startPause.classList.toggle("start");
+  stopwatch.startPause.classList.toggle("pause");
+}
+
+function moveWatchTime(stopwatch) {
+  if (stopwatch.watchStarted) {
+    stopwatch.intervalID = setInterval(() => {
+      stopwatch.seconds++;
+      if (stopwatch.seconds === 60) {
+        stopwatch.minutes++;
+        stopwatch.seconds = 0;
+      }
+      if (stopwatch.minutes === 60) {
+        stopwatch.hours++;
+        stopwatch.minutes = 0;
+      }
+      if (stopwatch.hours === 24) {
+        stopwatch.hours = 0;
+        stopwatch.minutes = 0;
+        stopwatch.seconds = 0;
+      }
+      updateWatchDisplay(stopwatch);
     }, 1000);
   } else {
-    clearInterval(intervalId);
+    clearInterval(stopwatch.intervalID);
   }
 }
 
-function updateDisplay() {
-  if (seconds === 60) {
-    minutes++;
-    seconds = 0;
-  }
-  if (minutes === 60) {
-    hours++;
-    minutes = 0;
-  }
-  if (hours === 24) {
-    hours = 0;
-    minutes = 0;
-    seconds = 0;
-  }
-
-  const secondsString = seconds < 10 ? `0${seconds}` : `${seconds}`;
-  const minutesString = minutes < 10 ? `0${minutes}` : `${minutes}`;
-  const hoursString = hours < 10 ? `0${hours}` : `${hours}`;
-
-  display.innerText = `${hoursString}:${minutesString}:${secondsString}`;
+function updateWatchDisplay(stopwatch) {
+  const secondsString =
+    stopwatch.seconds < 10 ? `0${stopwatch.seconds}` : `${stopwatch.seconds}`;
+  const minutesString =
+    stopwatch.minutes < 10 ? `0${stopwatch.minutes}` : `${stopwatch.minutes}`;
+  const hoursString =
+    stopwatch.hours < 10 ? `0${stopwatch.hours}` : `${stopwatch.hours}`;
+  stopwatch.display.innerText = `${hoursString}:${minutesString}:${secondsString}`;
 }
 
-function resetWatch() {
-  intervalRunning = false;
+function resetWatch(stopwatch) {
+  stopwatch.watchStarted = false;
 
-  hours = 0;
-  minutes = 0;
-  seconds = 0;
+  stopwatch.hours = 0;
+  stopwatch.minutes = 0;
+  stopwatch.seconds = 0;
 
-  startPause.innerText = "▶";
-  startPause.classList.remove("pause");
-  startPause.classList.add("start");
-  clearInterval(intervalId);
-  updateDisplay();
+  stopwatch.startPause.innerText = "▶";
+  stopwatch.startPause.classList.remove("pause");
+  stopwatch.startPause.classList.add("start");
+
+  stopwatch.wheelRotation = 0;
+  stopwatch.wheel1.style.transform = `rotate(${stopwatch.wheelRotation}deg)`;
+  stopwatch.wheel2.style.transform = `rotate(${stopwatch.wheelRotation}deg)`;
+
+  clearInterval(stopwatch.intervalID);
+  clearInterval(stopwatch.wheelIntervalID);
+  updateWatchDisplay(stopwatch);
+}
+
+function spinWatchWheels(stopwatch) {
+  if (stopwatch.watchStarted) {
+    stopwatch.wheelIntervalID = setInterval(() => {
+      stopwatch.wheelRotation = (stopwatch.wheelRotation + 1) % 360;
+      stopwatch.wheel1.style.transform = `rotate(${stopwatch.wheelRotation}deg)`;
+      stopwatch.wheel2.style.transform = `rotate(${stopwatch.wheelRotation}deg)`;
+    }, 10);
+  } else {
+    clearInterval(stopwatch.wheelIntervalID);
+  }
 }

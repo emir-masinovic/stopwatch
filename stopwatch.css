@@ -43,6 +43,29 @@ body {
   font-size: 5rem;
 }
 
+#stopwatch-wheels {
+  display: flex;
+  justify-content: space-around;
+}
+
+.stopwatch-wheel {
+  position: relative;
+  height: 50px;
+  width: 50px;
+  border: 1px solid black;
+  background-color: var(--box-shadow);
+  border-radius: 100%;
+}
+
+.stopwatch-wheel-line {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  height: 2px;
+  width: 48px;
+  background-color: rgb(170, 170, 170);
+}
+
 #stopwatch-buttons {
   display: flex;
   justify-content: space-around;
